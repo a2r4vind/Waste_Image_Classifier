@@ -1,0 +1,24 @@
+# Virtual Environment
+waste_classifier_venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Model files
+*.pth
+*.pt
+
+# Data (very important)
+data/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
