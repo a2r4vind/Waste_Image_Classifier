@@ -3,8 +3,8 @@ import random
 import os
 
 # Paths
-SOURCE_DIR = "/home/akki/CV_Project/waste_dataset" # path to the dataset directory
-TARGET_DIR = "/home/akki/CV_Project/Waste_Image_Classifier/data" # path to the directory where the split data will be stored
+SOURCE_DIR = "/home/akki2404/CV_Project/waste_dataset" # path to the dataset directory
+TARGET_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/data" # path to the directory where the split data will be stored
 
 # Classes 
 CLASSES = ["glass", "plastic", "metal", "paper"]

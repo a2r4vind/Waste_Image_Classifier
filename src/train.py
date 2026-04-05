@@ -26,8 +26,8 @@ val_transform = transforms.Compose(
 )
 
 # Dataset
-train_data = datasets.ImageFolder("/home/akki/CV_Project/Waste_Image_Classifier/data/train", transform=train_transform)
-val_data = datasets.ImageFolder("/home/akki/CV_Project/Waste_Image_Classifier/data/val", transform=val_transform)
+train_data = datasets.ImageFolder("/home/akki2404/CV_Project/Waste_Image_Classifier/data/train", transform=train_transform)
+val_data = datasets.ImageFolder("/home/akki2404/CV_Project/Waste_Image_Classifier/data/val", transform=val_transform)
 
 # DataLoader
 train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
@@ -110,4 +110,4 @@ print("Training completed successfully!")
 
 
 # Save the model
-torch.save(model.state_dict(), "/home/akki/CV_Project/Waste_Image_Classifier/models/resnet18_model.pth")
+torch.save(model.state_dict(), "/home/akki2404/CV_Project/Waste_Image_Classifier/models/resnet18_model.pth")
