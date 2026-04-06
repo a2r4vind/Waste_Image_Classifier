@@ -23,7 +23,7 @@ val_transform = transforms.Compose(
 )
 
 # Data directory
-DATA_DIR = "data"
+DATA_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/data"
 
 # Dataset
 train_data = datasets.ImageFolder(os.path.join(DATA_DIR,"train"), transform=train_transform)
@@ -50,6 +50,7 @@ model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
 
 # check if GPU is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 model.to(device)
 
 # Loss 
@@ -62,7 +63,8 @@ optimizer = optim.Adam(model.fc.parameters(), lr=0.001)
 best_acc = 0.0
 
 # Directory to save the best model
-MODEL_DIR = "/content/drive/MyDrive/Waste_Classification/models"
+# MODEL_DIR = "/content/drive/MyDrive/Waste_Classification/models"
+MODEL_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/models"
 # Create the directory if it doesn't exist
 os.makedirs(MODEL_DIR, exist_ok=True)
 model_path = os.path.join(MODEL_DIR, "best_model.pth")
