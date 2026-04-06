@@ -2,11 +2,8 @@ import torch
 from torchvision import datasets, transforms, models
 from torch import nn, optim
 from torch.utils.data import DataLoader
+import os
 
-# Config
-BATCH_SIZE = 32
-EPOCHS = 5
-NUM_CLASSES = 4
 
 # Transforms
 train_transform = transforms.Compose(
@@ -25,9 +22,17 @@ val_transform = transforms.Compose(
     ]
 )
 
+# Data directory
+DATA_DIR = "data"
+
 # Dataset
-train_data = datasets.ImageFolder("/home/akki2404/CV_Project/Waste_Image_Classifier/data/train", transform=train_transform)
-val_data = datasets.ImageFolder("/home/akki2404/CV_Project/Waste_Image_Classifier/data/val", transform=val_transform)
+train_data = datasets.ImageFolder(os.path.join(DATA_DIR,"train"), transform=train_transform)
+val_data = datasets.ImageFolder(os.path.join(DATA_DIR,"val"), transform=val_transform)
+
+# Config
+BATCH_SIZE = 32
+EPOCHS = 5
+NUM_CLASSES = len(train_data.classes)
 
 # DataLoader
 train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
@@ -52,6 +57,15 @@ criterion = nn.CrossEntropyLoss()
 
 # Optimizer 
 optimizer = optim.Adam(model.fc.parameters(), lr=0.001)
+
+# initialize best accuracy
+best_acc = 0.0
+
+# Directory to save the best model
+MODEL_DIR = "/content/drive/MyDrive/Waste_Classification/models"
+# Create the directory if it doesn't exist
+os.makedirs(MODEL_DIR, exist_ok=True)
+model_path = os.path.join(MODEL_DIR, "best_model.pth")
 
 # Training Loop
 for epoch in range(EPOCHS):
@@ -101,6 +115,11 @@ for epoch in range(EPOCHS):
 
     val_acc = 100 * val_correct / val_total
 
+    if val_acc > best_acc:
+        best_acc = val_acc
+        torch.save(model.state_dict(), model_path)
+        print(f"Best model saved with accuracy: {best_acc:.2f}%")
+
     print(f"Epoch {epoch+1}")
     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.2f}%")
     print(f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.2f}%")
@@ -110,4 +129,4 @@ print("Training completed successfully!")
 
 
 # Save the model
-torch.save(model.state_dict(), "/home/akki2404/CV_Project/Waste_Image_Classifier/models/resnet18_model.pth")
+# torch.save(model.state_dict(), "/home/akki2404/CV_Project/Waste_Image_Classifier/models/resnet18_model.pth")

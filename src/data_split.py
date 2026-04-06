@@ -1,10 +1,22 @@
 import shutil
 import random
+import numpy as np
 import os
+
+# fix randomness for reproducibility
+random.seed(42)
+np.random.seed(42)
 
 # Paths
 SOURCE_DIR = "/home/akki2404/CV_Project/waste_dataset" # path to the dataset directory
 TARGET_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/data" # path to the directory where the split data will be stored
+
+# prevent re-splitting if data already splitted
+if os.path.exists(f"{TARGET_DIR}/train") and os.path.exists(f"{TARGET_DIR}/val"):
+    print("Data already split. Skipping splitting process.")
+    exit()
+
+
 
 # Classes 
 CLASSES = ["glass", "plastic", "metal", "paper"]
