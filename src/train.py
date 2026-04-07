@@ -65,6 +65,10 @@ model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
 for param in model.fc.parameters():
     param.requires_grad = True
 
+# train layer4
+for param in model.layer4.parameters():
+    param.requires_grad = True
+
 
 # check if GPU is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -74,10 +78,12 @@ model.to(device)
 # Loss 
 criterion = nn.CrossEntropyLoss()
 
-# Optimizer 
+# Optimizer with Differential Learning Rates
 optimizer = optim.Adam(
-    model.fc.parameters(), 
-    lr=0.0003 # 0.001 -> 0.0003
+    [
+        {"params": model.fc.parameters(), "lr": 0.0005}, # faster learning
+        {"params": model.layer4.parameters(), "lr": 0.0001} # slower learning
+    ]
 )
 
 # initialize best accuracy
