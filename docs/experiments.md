@@ -155,3 +155,85 @@ weighted avg       0.76      0.69      0.65       301
 - Try partial freezing (freeze layer4 partially or completely)
 - Add regularization (Dropout / Weight decay)
 - Train for fewer epochs (early stopping)
+
+## Experiment 3: Reduced Complexity (FC-only Training)
+
+### Changes
+- Removed deep fine-tuning (layer4 frozen)
+- Trained only final classification layer
+- Reduced learning rate to 0.0003
+- Used moderate augmentations
+
+### Results
+
+#### Validation Performance
+- Best Validation Accuracy: 77.10%
+- Epoch of Best Accuracy: 9
+
+#### Test Performance
+- Test Accuracy: 67.44%
+
+#### Confusion Matrix
+```
+| Actual \ Predicted | glass | metal | paper | plastic |
+|-------------------|-------|-------|-------|---------|
+| glass             | 56    | 6     | 6     | 8       |
+| metal             | 18    | 28    | 4     | 12      |
+| paper             | 5     | 1     | 82    | 2       |
+| plastic           | 17    | 1     | 18    | 37      |
+```
+
+#### Classification Report
+```
+Classification Report:
+              precision    recall  f1-score   support
+
+       glass       0.58      0.74      0.65        76
+       metal       0.78      0.45      0.57        62
+       paper       0.75      0.91      0.82        90
+     plastic       0.63      0.51      0.56        73
+
+    accuracy                           0.67       301
+   macro avg       0.68      0.65      0.65       301
+weighted avg       0.68      0.67      0.66       301
+```
+
+#### Classification Insights
+
+- **Paper remains strongest class (~0.82 F1-score)**
+- **Metal recall dropped significantly (~0.45)**
+- Model struggles with:
+  - Plastic vs Glass
+  - Plastic vs Paper
+- Overall predictions are less confident compared to baseline
+
+---
+
+### Observations
+
+- Removing fine-tuning reduced overfitting but led to **underfitting**
+- Validation and test accuracy both decreased compared to baseline
+- Model lacks capacity to learn deeper feature representations
+- Performance is more stable but less accurate
+
+---
+
+### Key Learning
+
+- Too much fine-tuning → overfitting  
+- Too little fine-tuning → underfitting  
+- Need a balance between feature learning and generalization  
+
+---
+
+### Conclusion
+
+The FC-only approach reduces overfitting but significantly limits model performance. This confirms that some level of fine-tuning is necessary for optimal results.
+
+---
+
+### Next Steps
+
+- Fine-tune only part of layer4 (partial unfreezing)
+- Use smaller learning rate for deeper layers
+- Introduce differential learning rates

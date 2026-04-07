@@ -8,9 +8,9 @@ import os
 # Transforms
 train_transform = transforms.Compose(
     [
-        transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+        transforms.Resize((224,224)),
         transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(20),
+        transforms.RandomRotation(10), # 10 -> 20 -> 10
         transforms.ColorJitter(
             brightness=0.3,
             contrast=0.3,
@@ -58,13 +58,13 @@ model = models.resnet18(weights="IMAGENET1K_V1")
 for param in model.parameters():
     param.requires_grad = False
 
-# fine-tuning -> modified layer 4
-for param in model.layer4.parameters():
-    param.requires_grad = True
-
-
 # Replace the final layer
 model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
+
+# Only train FC layer
+for param in model.fc.parameters():
+    param.requires_grad = True
+
 
 # check if GPU is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -76,8 +76,8 @@ criterion = nn.CrossEntropyLoss()
 
 # Optimizer 
 optimizer = optim.Adam(
-    list(model.fc.parameters()) + list(model.layer4.parameters()), 
-    lr=0.001
+    model.fc.parameters(), 
+    lr=0.0003 # 0.001 -> 0.0003
 )
 
 # initialize best accuracy
@@ -149,7 +149,3 @@ for epoch in range(EPOCHS):
     print("-" * 30)
 
 print("Training completed successfully!")
-
-
-# Save the model
-# torch.save(model.state_dict(), "/home/akki2404/CV_Project/Waste_Image_Classifier/models/resnet18_model.pth")
