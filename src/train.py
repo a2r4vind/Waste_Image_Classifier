@@ -8,10 +8,19 @@ import os
 # Transforms
 train_transform = transforms.Compose(
     [
-        transforms.Resize((224, 224)),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(10),
+        transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(20),
+        transforms.ColorJitter(
+            brightness=0.3,
+            contrast=0.3,
+            saturation=0.3
+        ),
         transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        )
     ]
 )
 
@@ -19,6 +28,10 @@ val_transform = transforms.Compose(
     [
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        )
     ]
 )
 
@@ -31,7 +44,7 @@ val_data = datasets.ImageFolder(os.path.join(DATA_DIR,"val"), transform=val_tran
 
 # Config
 BATCH_SIZE = 32
-EPOCHS = 5
+EPOCHS = 10 # 5 -> 10 
 NUM_CLASSES = len(train_data.classes)
 
 # DataLoader
@@ -45,6 +58,11 @@ model = models.resnet18(weights="IMAGENET1K_V1")
 for param in model.parameters():
     param.requires_grad = False
 
+# fine-tuning -> modified layer 4
+for param in model.layer4.parameters():
+    param.requires_grad = True
+
+
 # Replace the final layer
 model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
 
@@ -57,7 +75,10 @@ model.to(device)
 criterion = nn.CrossEntropyLoss()
 
 # Optimizer 
-optimizer = optim.Adam(model.fc.parameters(), lr=0.001)
+optimizer = optim.Adam(
+    list(model.fc.parameters()) + list(model.layer4.parameters()), 
+    lr=0.001
+)
 
 # initialize best accuracy
 best_acc = 0.0

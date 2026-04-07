@@ -73,3 +73,85 @@ The baseline ResNet18 model achieves a test accuracy of 76.74%. While performanc
 - Add data augmentation
 - Fine-tune deeper layers
 - Increase epochs
+
+## Experiment 2: ResNet18 with Advanced Augmentation & Fine-Tuning
+
+### Changes
+- Added advanced augmentations:
+  - RandomResizedCrop
+  - Horizontal Flip
+  - Rotation
+  - ColorJitter
+- Increased epochs from 5 → 10
+- Fine-tuned deeper layers (layer4)
+- Used normalization
+
+### Results
+
+#### Validation Performance
+- Best Validation Accuracy: 92.93%
+- Epoch of Best Accuracy: 9
+
+#### Test Performance
+- Test Accuracy: 69.10%
+
+#### Confusion Matrix
+```
+| Actual \ Predicted | glass | metal | paper | plastic |
+|-------------------|-------|-------|-------|---------|
+| glass             | 62    | 0     | 0     | 14      |
+| metal             | 29    | 9     | 6     | 18      |
+| paper             | 4     | 0     | 78    | 8       |
+| plastic           | 9     | 0     | 5     | 59      |
+```
+
+#### Classification Report
+```
+Classification Report:
+              precision    recall  f1-score   support
+
+       glass       0.60      0.82      0.69        76
+       metal       1.00      0.15      0.25        62
+       paper       0.88      0.87      0.87        90
+     plastic       0.60      0.81      0.69        73
+
+    accuracy                           0.69       301
+   macro avg       0.77      0.66      0.62       301
+weighted avg       0.76      0.69      0.65       301
+```
+
+#### Classification Insights
+
+- **Paper** remains the best-performing class (~87% F1-score)
+- **Metal performance dropped significantly**:
+  - Recall: 0.15 (very poor)
+  - Model fails to correctly identify metal samples
+- **Glass and plastic confusion persists**
+- Model predicts "glass" too frequently (bias toward glass class)
+
+---
+
+### Observations
+
+- Significant increase in validation accuracy (+15%) but decrease in test accuracy (-7.6%)
+- Indicates **overfitting due to aggressive augmentations + deeper fine-tuning**
+- Model memorizes training/validation patterns but fails to generalize to unseen data
+- Class imbalance and feature similarity between classes (glass/plastic/metal) contribute to confusion
+
+---
+
+### Key Learning
+
+- Higher validation accuracy does NOT guarantee better generalization
+- Fine-tuning deeper layers without proper regularization can hurt performance
+- Evaluation on test set is critical for true model assessment
+
+---
+
+### Next Steps
+
+- Reduce augmentation intensity (especially RandomResizedCrop)
+- Lower learning rate for fine-tuning
+- Try partial freezing (freeze layer4 partially or completely)
+- Add regularization (Dropout / Weight decay)
+- Train for fewer epochs (early stopping)
