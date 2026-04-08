@@ -73,87 +73,103 @@
 - Fine-tune deeper layers
 - Increase epochs
 
-## Experiment 2: ResNet18 with Advanced Augmentation & Fine-Tuning
+## Experiment 2: ResNet18 with Advanced Augmentation & layer 4 Fine-Tuning
 
-### Changes
-- Added advanced augmentations:
-  - RandomResizedCrop
-  - Horizontal Flip
-  - Rotation
-  - ColorJitter
-- Increased epochs from 5 → 10
-- Fine-tuned deeper layers (layer4)
-- Used normalization
+### Model
+- Architecture: ResNet18 (pretrained on ImageNet)
+- Training Strategy: Fine-tuned last block (layer4) + FC layer
+- Frozen Layers: All except layer4 and FC
+
+### Data
+- Dataset: TrashNet
+- Split: Train/Val/Test = 70/15/15
+- Input Size: 224x224
+
+### Transforms (Train)
+- Random Resized Crop (224, scale=0.8–1.0)
+- Random Horizontal Flip
+- Random Rotation (20°)
+- Color Jitter (brightness, contrast, saturation = 0.3)
+- Normalization (ImageNet mean/std)
+
+### Transforms (Val/Test)
+- Resize (224, 224)
+- Normalization (ImageNet mean/std)
+
+### Training Config
+- Epochs: 10
+- Batch Size: 32
+- Optimizer: Adam (Differential Learning Rates)
+  - FC layer: 0.001
+  - Layer4: 0.0001
+- Loss Function: CrossEntropyLoss
 
 ### Results
+- Best Validation Accuracy: **90.24% (Epoch 8)**
+- Test Accuracy: **90.03%**
 
-#### Validation Performance
-- Best Validation Accuracy: 92.93%
-- Epoch of Best Accuracy: 9
-
-#### Test Performance
-- Test Accuracy: 69.10%
 
 #### Confusion Matrix
 ```
 | Actual \ Predicted | glass | metal | paper | plastic |
-|-------------------|-------|-------|-------|---------|
-| glass             | 62    | 0     | 0     | 14      |
-| metal             | 29    | 9     | 6     | 18      |
-| paper             | 4     | 0     | 78    | 8       |
-| plastic           | 9     | 0     | 5     | 59      |
+|--------------------|-------|-------|-------|---------|
+| glass              | 70    | 5     | 0     | 1       |
+| metal              | 7     | 55    | 0     | 0       |
+| paper              | 1     | 1     | 87    | 1       |
+| plastic            | 5     | 5     | 4     | 59      |
 ```
 
-#### Classification Report
+### Classification Report (Test)
 ```
-Classification Report:
-              precision    recall  f1-score   support
-
-       glass       0.60      0.82      0.69        76
-       metal       1.00      0.15      0.25        62
-       paper       0.88      0.87      0.87        90
-     plastic       0.60      0.81      0.69        73
-
-    accuracy                           0.69       301
-   macro avg       0.77      0.66      0.62       301
-weighted avg       0.76      0.69      0.65       301
+| Class   | Precision | Recall | F1-score |
+|---------|-----------|--------|----------|
+| glass   | 0.84      | 0.92   | 0.88     |
+| metal   | 0.83      | 0.89   | 0.86     |
+| paper   | 0.96      | 0.97   | 0.96     |
+| plastic | 0.97      | 0.81   | 0.88     |
 ```
+- Macro Avg F1: **0.90**
+- Weighted Avg F1: **0.90**
 
 #### Classification Insights
 
-- **Paper** remains the best-performing class (~87% F1-score)
-- **Metal performance dropped significantly**:
-  - Recall: 0.15 (very poor)
-  - Model fails to correctly identify metal samples
-- **Glass and plastic confusion persists**
-- Model predicts "glass" too frequently (bias toward glass class)
+- **Paper** remains the best-performing class (~96% F1-score)
+- Data augmentation greatly improved generalization
+- Fine-tuning deeper layers (layer4) is highly effective
+- Differential learning rates stabilized training
+- Model now captures more complex features
 
 ---
 
 ### Observations
-
-- Significant increase in validation accuracy (+15%) but decrease in test accuracy (-7.6%)
-- Indicates **overfitting due to aggressive augmentations + deeper fine-tuning**
-- Model memorizes training/validation patterns but fails to generalize to unseen data
-- Class imbalance and feature similarity between classes (glass/plastic/metal) contribute to confusion
+- Significant improvement over baseline (+11% accuracy)
+- Strong generalization (val ≈ test accuracy)
+- All classes improved, especially:
+  - Glass (recall ↑)
+  - Metal (balanced precision/recall)
+- Paper remains easiest class
+- Slight drop in plastic recall (possible confusion)
 
 ---
 
-### Key Learning
-
-- Higher validation accuracy does NOT guarantee better generalization
-- Fine-tuning deeper layers without proper regularization can hurt performance
-- Evaluation on test set is critical for true model assessment
+### Comparison with Baseline
+```
+| Metric             | Experiment 1 | Experiment 2 |
+|--------------------|--------------|--------------|
+| Val Accuracy       | 78.11%       | 90.24%       |
+| Test Accuracy      | 79.07%       | 90.03%       |
+| Macro F1           | 0.78         | 0.90         |
+```
+ Improvement: **~+11% accuracy**
 
 ---
 
 ### Next Steps
 
-- Reduce augmentation intensity (especially RandomResizedCrop)
+- Try reduce augmentation intensity (especially RandomResizedCrop)
 - Lower learning rate for fine-tuning
 - Try partial freezing (freeze layer4 partially or completely)
-- Add regularization (Dropout / Weight decay)
-- Train for fewer epochs (early stopping)
+
 
 ## Experiment 3: Reduced Complexity (FC-only Training)
 
