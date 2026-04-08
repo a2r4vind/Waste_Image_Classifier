@@ -3,71 +3,70 @@
 ## Experiment 1: Baseline ResNet18
 
 ### Model
-- Architecture: ResNet18 (pretrained)
-- Final layer modified for 4 classes
+- Architecture: ResNet18 (pretrained on ImageNet)
+- Training Strategy: Only final FC layer trained
+- Frozen Layers: All except FC
 
 ### Data
-- Train/Val/Test split: 70/15/15
 - Dataset: TrashNet
+- Split: Train/Val/Test = 70/15/15
+- Input Size: 224x224
+
+### Transforms
+- Resize (224, 224)
+- Random Horizontal Flip
+- Random Rotation (10°)
+- Normalization (ImageNet mean/std)
 
 ### Training Config
 - Epochs: 5
 - Batch size: 32
 - Optimizer: Adam
 - Learning rate: 0.001
+- Loss Function: CrossEntropyLoss
 
 ### Results
-- Best Validation Accuracy: 77.44%
-- Epoch of Best Accuracy: 3
+- Best Validation Accuracy: **78.11%**
+- Test Accuracy: **79.07%**
+- Epoch of Best Accuracy: 5
+
+### Classification Report (Test)
+```
+| Class   | Precision | Recall | F1-score |
+|---------|-----------|--------|----------|
+| glass   | 0.73      | 0.71   | 0.72     |
+| metal   | 0.72      | 0.79   | 0.75     |
+| paper   | 0.88      | 0.93   | 0.91     |
+| plastic | 0.80      | 0.70   | 0.74     |
+```
+- Macro Avg F1: **0.78** 
+- Weighted Avg F1: **0.79**
 
 ### Observations
-- Model converges quickly
-- Slight overfitting after epoch 3
-- Validation accuracy stabilizes
+- Strong baseline performance (~79% test accuracy)
+- Model generalizes well (val ≈ test accuracy)
+- Paper class performs best (high precision & recall)
+- Glass and plastic show moderate confusion
+- No severe class imbalance issues observed
 
 ### Test Results
 
-- Test Accuracy: 76.74%
+- Test Accuracy: **79.07%**
 
 #### Confusion Matrix
 
 ```
 | Actual \ Predicted | glass | metal | paper | plastic |
 |------------------- |-------|-------|-------|---------|
-| glass              | 45    | 21    | 1     | 9       |
-| metal              | 3     | 56    | 2     | 1       |
-| paper              | 2     | 2     | 79    | 7       |
-| plastic            | 5     | 11    | 6     | 51      |
+| glass              | 54    | 12    | 1     | 9       |
+| metal              | 8     | 49    | 4     | 1       |
+| paper              | 3     | 0     | 84    | 3       |
+| plastic            | 9     | 7     | 6     | 51      |
 ```
 
-#### Classification Report
-
-- Glass:
-  - Precision: 0.82
-  - Recall: 0.59
-- Metal:
-  - Precision: 0.62
-  - Recall: 0.90
-- Paper:
-  - Precision: 0.90
-  - Recall: 0.88
-- Plastic:
-  - Precision: 0.75
-  - Recall: 0.70
-
-### Detailed Observations
-
-- The model performs best on **paper** with high precision and recall (~0.90), indicating strong feature learning for this class.
-- **Metal** shows high recall (0.90) but lower precision (0.62), suggesting the model correctly identifies most metal items but also misclassifies other classes as metal.
-- **Glass** has relatively low recall (0.59), indicating the model struggles to correctly identify all glass samples.
-- Confusion is observed between:
-  - Glass and plastic
-  - Plastic and metal
-- Overall test accuracy (76.74%) is slightly lower than validation accuracy (77.44%), indicating good generalization with minimal overfitting.
-
-### Conclusion
-
-The baseline ResNet18 model achieves a test accuracy of 76.74%. While performance is strong for certain classes like paper, there is room for improvement in distinguishing visually similar classes such as glass and plastic. Future improvements will focus on enhanced data augmentation and fine-tuning deeper layers of the network.
+### Insights
+- Even with only FC layer training, pretrained features are effective
+- Baseline is already strong → improvements will be incremental
 
 ### Next Steps
 - Add data augmentation
