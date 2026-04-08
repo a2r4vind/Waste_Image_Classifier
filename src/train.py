@@ -8,10 +8,10 @@ import os
 # Transforms
 train_transform = transforms.Compose(
     [
-        # transforms.Resize((224, 224)), 
-        transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+        transforms.Resize((224, 224)), # not in exp2
+        # transforms.RandomResizedCrop(224, scale=(0.8, 1.0)), # in exp2
         transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(20), # 10 -> 20
+        transforms.RandomRotation(10), # 10 -> 20 (exp2) -> 10
         transforms.ColorJitter(
             brightness=0.3,
             contrast=0.3,
@@ -59,9 +59,9 @@ model = models.resnet18(weights="IMAGENET1K_V1") # resnet18 -> resnet34
 for param in model.parameters():
     param.requires_grad = False
 
-# fine-tuning -> modified layer 4 
-for param in model.layer4.parameters():
-    param.requires_grad = True
+# # fine-tuning -> modified layer 4 
+# for param in model.layer4.parameters():  # in exp2, also fine-tune layer3
+#     param.requires_grad = True
 
 # Replace the final layer
 model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
@@ -81,10 +81,11 @@ criterion = nn.CrossEntropyLoss()
 
 # Optimizer
 # optimizer = optim.Adam(model.fc.parameters(), lr=0.001) # 0.001 => Higher LR helps faster convergence
-optimizer = optim.Adam(
-    list(model.fc.parameters()) + list(model.layer4.parameters()),
-    lr=0.001
-) 
+# optimizer = optim.Adam(
+#     list(model.fc.parameters()) + list(model.layer4.parameters()), # in exp2
+#     lr=0.001
+# )
+optimizer = optim.Adam(model.fc.parameters(), lr=0.0003) # lr = 0.001 -> 0.0003 (exp3)
 
 # initialize best accuracy
 best_acc = 0.0
@@ -95,7 +96,7 @@ MODEL_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/models"
 # Create the directory if it doesn't exist
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-EXP_NAME = "exp2_resnet18_aug_layer4_finetune"
+EXP_NAME = "exp3_resnet18_reduced_lr_aug" # change for each experiment
 
 model_path = os.path.join(MODEL_DIR, f"{EXP_NAME}.pth")
 

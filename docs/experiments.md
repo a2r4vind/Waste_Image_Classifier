@@ -182,20 +182,20 @@
 ### Results
 
 #### Validation Performance
-- Best Validation Accuracy: 77.10%
-- Epoch of Best Accuracy: 9
+- Best Validation Accuracy: 80.47%
+- Epoch of Best Accuracy: 7
 
 #### Test Performance
-- Test Accuracy: 67.44%
+- Test Accuracy: 75.75%
 
 #### Confusion Matrix
 ```
 | Actual \ Predicted | glass | metal | paper | plastic |
-|-------------------|-------|-------|-------|---------|
-| glass             | 56    | 6     | 6     | 8       |
-| metal             | 18    | 28    | 4     | 12      |
-| paper             | 5     | 1     | 82    | 2       |
-| plastic           | 17    | 1     | 18    | 37      |
+|--------------------|-------|-------|-------|---------|
+| metal              | 9     | 46    | 6     | 1       |
+| glass              | 57    | 14    | 0     | 5       |
+| paper              | 4     | 3     | 78    | 5       |
+| plastic            | 12    | 10    | 4     | 47      |
 ```
 
 #### Classification Report
@@ -203,47 +203,35 @@
 Classification Report:
               precision    recall  f1-score   support
 
-       glass       0.58      0.74      0.65        76
-       metal       0.78      0.45      0.57        62
-       paper       0.75      0.91      0.82        90
-     plastic       0.63      0.51      0.56        73
+       glass       0.70      0.75      0.72        76
+       metal       0.63      0.74      0.68        62
+       paper       0.89      0.87      0.88        90
+     plastic       0.81      0.64      0.72        73
 
-    accuracy                           0.67       301
-   macro avg       0.68      0.65      0.65       301
-weighted avg       0.68      0.67      0.66       301
+    accuracy                           0.76       301
+   macro avg       0.76      0.75      0.75       301
+weighted avg       0.77      0.76      0.76       301
 ```
-
-#### Classification Insights
-
-- **Paper remains strongest class (~0.82 F1-score)**
-- **Metal recall dropped significantly (~0.45)**
-- Model struggles with:
-  - Plastic vs Glass
-  - Plastic vs Paper
-- Overall predictions are less confident compared to baseline
 
 ---
 
 ### Observations
 
-- Removing fine-tuning reduced overfitting but led to **underfitting**
-- Validation and test accuracy both decreased compared to baseline
-- Model lacks capacity to learn deeper feature representations
-- Performance is more stable but less accurate
+- Training convergence was slower due to reduced learning rate.
+- Final performance is worse than Experiment 2.
+- Model struggled more with:
+    - glass–plastic confusion
+    - metal class performance
+- Lower LR prevented strong adaptation of FC layer.
 
 ---
 
-### Key Learning
-
-- Too much fine-tuning → overfitting  
-- Too little fine-tuning → underfitting  
-- Need a balance between feature learning and generalization  
-
----
 
 ### Conclusion
 
-The FC-only approach reduces overfitting but significantly limits model performance. This confirms that some level of fine-tuning is necessary for optimal results.
+- Reducing learning rate too early hurts performance when training only FC layer.
+- LR = 0.001 (Experiment 2) is more effective for this setup.
+- Lower LR may be useful only when fine-tuning deeper layers, not FC-only training.
 
 ---
 

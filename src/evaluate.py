@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 # experiment name
-EXP_NAME = "exp2_resnet18_aug_layer4_finetune" # change for each experiment
+EXP_NAME = "exp3_resnet18_reduced_lr_aug" # change for each experiment
 print(f"Evaluating model for experiment {EXP_NAME}...")
 print("=== Evaluation Started ===")
 

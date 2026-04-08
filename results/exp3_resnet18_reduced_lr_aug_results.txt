@@ -1,0 +1,22 @@
+Experiment: exp3_resnet18_reduced_lr_aug
+
+Confusion Matrix:
+[[57 14  0  5]
+ [ 9 46  6  1]
+ [ 4  3 78  5]
+ [12 10  4 47]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+       glass       0.70      0.75      0.72        76
+       metal       0.63      0.74      0.68        62
+       paper       0.89      0.87      0.88        90
+     plastic       0.81      0.64      0.72        73
+
+    accuracy                           0.76       301
+   macro avg       0.76      0.75      0.75       301
+weighted avg       0.77      0.76      0.76       301
+
+
+Test Accuracy: 75.75%
