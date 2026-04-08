@@ -8,15 +8,15 @@ import os
 # Transforms
 train_transform = transforms.Compose(
     [
-        transforms.Resize((224, 224)), 
-        # transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(10), # 10 -> 20
-        # transforms.ColorJitter(
-        #     brightness=0.3,
-        #     contrast=0.3,
-        #     saturation=0.3
-        # ),
+        # transforms.Resize((224, 224)), 
+        transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(20), # 10 -> 20
+        transforms.ColorJitter(
+            brightness=0.3,
+            contrast=0.3,
+            saturation=0.3
+        ),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -45,7 +45,7 @@ val_data = datasets.ImageFolder(os.path.join(DATA_DIR,"val"), transform=val_tran
 
 # Config
 BATCH_SIZE = 32
-EPOCHS = 5 # 5 -> 10 
+EPOCHS = 10 # 5 -> 10 
 NUM_CLASSES = len(train_data.classes)
 
 # DataLoader
@@ -60,8 +60,8 @@ for param in model.parameters():
     param.requires_grad = False
 
 # fine-tuning -> modified layer 4 
-# for param in model.layer4.parameters():
-#     param.requires_grad = True
+for param in model.layer4.parameters():
+    param.requires_grad = True
 
 # Replace the final layer
 model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
@@ -69,10 +69,6 @@ model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
 #  train FC layer
 for param in model.fc.parameters():
     param.requires_grad = True
-
-# # train layer4
-# for param in model.layer4.parameters():
-#     param.requires_grad = True
 
 
 # check if GPU is available
@@ -83,23 +79,24 @@ model.to(device)
 # Loss 
 criterion = nn.CrossEntropyLoss()
 
-# Optimizer (only FC layer)
 # Optimizer
 # optimizer = optim.Adam(model.fc.parameters(), lr=0.001) # 0.001 => Higher LR helps faster convergence
-# optimizer = optim.Adam(
-#     list(model.fc.parameters()) + list(model.layer4.parameters()),
-#     lr=0.001
-# )
-optimizer = optim.Adam(model.fc.parameters(), lr=0.001)
+optimizer = optim.Adam(
+    list(model.fc.parameters()) + list(model.layer4.parameters()),
+    lr=0.001
+) 
 
 # initialize best accuracy
 best_acc = 0.0
 
 # Directory to save the best model
 MODEL_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/models"
+
 # Create the directory if it doesn't exist
 os.makedirs(MODEL_DIR, exist_ok=True)
-EXP_NAME = "exp1_resnet18_baseline_fc_only"
+
+EXP_NAME = "exp2_resnet18_aug_layer4_finetune"
+
 model_path = os.path.join(MODEL_DIR, f"{EXP_NAME}.pth")
 
 print(f"Training ResNet18 for experiment {EXP_NAME}...")
