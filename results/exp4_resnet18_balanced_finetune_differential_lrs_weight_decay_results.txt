@@ -1,0 +1,22 @@
+Experiment: exp4_resnet18_balanced_finetune_differential_lrs_weight_decay
+
+Confusion Matrix:
+[[70  5  0  1]
+ [ 6 56  0  0]
+ [ 2  1 87  0]
+ [ 6  5  3 59]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+       glass       0.83      0.92      0.88        76
+       metal       0.84      0.90      0.87        62
+       paper       0.97      0.97      0.97        90
+     plastic       0.98      0.81      0.89        73
+
+    accuracy                           0.90       301
+   macro avg       0.90      0.90      0.90       301
+weighted avg       0.91      0.90      0.90       301
+
+
+Test Accuracy: 90.37%

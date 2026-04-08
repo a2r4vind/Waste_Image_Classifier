@@ -240,98 +240,114 @@ weighted avg       0.77      0.76      0.76       301
 - Fine-tune only part of layer4 (partial unfreezing)
 - Use smaller learning rate for deeper layers
 - Introduce differential learning rates
+- Can also use weight decay
 
-## Experiment 4: Balanced Fine-Tuning (FC + Layer4 with Differential LR)
+## Experiment 4: ResNet18 + Fine-Tuning + Differential Learning Rates + Weight Decay
 
-### Changes
-- Fine-tuned both:
-  - Final classification layer (fc)
-  - Last convolutional block (layer4)
+### Objective
+Improve model generalization and stability by:
+- Applying differential learning rates
+- Adding weight decay regularization
+
+---
+
+### Changes from Experiment 2
 - Used differential learning rates:
-  - FC layer: 0.0005
-  - Layer4: 0.0001
-- Used moderate augmentations and normalization
-- Epochs: 10
+  - FC layer → lr = 0.0005
+  - Layer4 → lr = 0.0001
+- Added weight decay = 1e-4
+- Same augmentation as Experiment 2
 
-### Results
+---
 
-#### Validation Performance
-- Best Validation Accuracy: 93.27%
-- Epoch of Best Accuracy: 8
+### Model Configuration
+- Architecture: ResNet18 (pretrained on ImageNet)
+- Trainable layers:
+  - Fully Connected (FC)
+  - Layer4
+- Frozen layers:
+  - All earlier layers
 
-#### Test Performance
-- Test Accuracy: 71.76%
+---
+
+### Training Results
+- Best Validation Accuracy: 91.25%
+- Best Epoch: ~7–9
+- Final Training Accuracy: ~98%
+
+---
+
+### Test Results
+- Test Accuracy: 90.37%
+
+#### Classification Report
+- Glass → Precision: 0.83 | Recall: 0.92 | F1-score: 0.88
+- Metal → Precision: 0.84 | Recall: 0.90 | F1-score: 0.87
+- Paper → Precision: 0.97 | Recall: 0.97 | F1-score: 0.97
+- Plastic → Precision: 0.98 | Recall: 0.81 | F1-score: 0.89
+
+---
 
 #### Confusion Matrix
 ```
 | Actual \ Predicted | glass | metal | paper | plastic |
-|-------------------|-------|-------|-------|---------|
-| glass             | 64    | 0     | 1     | 11      |
-| metal             | 18    | 8     | 3     | 33      |
-| paper             | 0     | 0     | 84    | 6       |
-| plastic           | 6     | 0     | 7     | 60      |
+|--------------------|-------|-------|-------|---------|
+| metal              | 70    | 5     | 0     | 1       |
+| glass              | 6     | 56    | 0     | 0       |
+| paper              | 2     | 1     | 87    | 0       |
+| plastic            | 6     | 5     | 3     | 59      |
 ```
+
+---
+
 #### Classification Report
 ```
 Classification Report:
               precision    recall  f1-score   support
 
-       glass       0.73      0.84      0.78        76
-       metal       1.00      0.13      0.23        62
-       paper       0.88      0.93      0.91        90
-     plastic       0.55      0.82      0.66        73
+       glass       0.83      0.92      0.88        76
+       metal       0.84      0.90      0.87        62
+       paper       0.97      0.97      0.97        90
+     plastic       0.98      0.81      0.89        73
 
-    accuracy                           0.72       301
-   macro avg       0.79      0.68      0.64       301
-weighted avg       0.79      0.72      0.67       301
+    accuracy                           0.90       301
+   macro avg       0.90      0.90      0.90       301
+weighted avg       0.91      0.90      0.90       301
 ```
 
-#### Classification Insights
+---
 
-- **Paper performs best (~0.91 F1-score)**
-- **Glass improved compared to previous experiments**
-- **Plastic recall improved (~0.82)**
-- **Metal remains the weakest class**:
-  - Recall: 0.13 (very poor)
-  - Model struggles to identify metal correctly
-- Strong confusion between:
-  - Metal ↔ Plastic
-  - Metal ↔ Glass
+### Key Observations
+- Differential learning rates improved stability of fine-tuning
+- Weight decay reduced overfitting
+- Metal class performance improved significantly
+- Plastic still has minor confusion with other classes
 
 ---
 
-### Observations
-
-- Balanced fine-tuning improved test accuracy compared to:
-  - Experiment 2 (+2.6%)
-  - Experiment 3 (+4.3%)
-- However, still worse than baseline (-5%)
-- Validation accuracy remains high → slight overfitting still present
-- Model is biased toward non-metal classes
-
----
-
-### Key Learning
-
-- Differential learning rates help stabilize fine-tuning
-- Partial fine-tuning is better than:
-  - Full fine-tuning (overfitting)
-  - No fine-tuning (underfitting)
-- However, class-specific issues (metal class) still limit performance
-
+### Comparison with Previous Experiments
+```
+| Experiment |           Strategy              | Test Accuracy |
+|------------|---------------------------------|---------------|
+| Exp1       | Baseline (FC only)              | 79.07%        |
+| Exp2       | Augmentation + Layer4 fine-tune | 90.03%        |
+| Exp3       | Reduced LR (FC only)            | 75.75%        |
+| Exp4       | Differential LR + Weight Decay  | **90.37%**    |
+```
 ---
 
 ### Conclusion
+- Best performing model so far
+- Balanced performance across all classes
+- Selected as current **champion model**
 
-Balanced fine-tuning improves performance over naive approaches but does not outperform the baseline model. Further improvements should focus on class imbalance handling and class-specific feature learning.
+## Champion Model
 
----
+**Experiment:** Exp4 (ResNet18 + Differential LR + Weight Decay)  
+**Test Accuracy:** 90.37%  
+
+This model provides the best balance between performance and generalization.
 
 ### Next Steps
 
-- Improve metal class performance:
-  - Use class weights in loss function
-  - Try oversampling
-- Try early stopping (best epoch ≈ 8)
-- Experiment with learning rate scheduling
 - Explore deeper architectures (ResNet34 / EfficientNet)
