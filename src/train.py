@@ -1,79 +1,33 @@
-import torch
-from torchvision import datasets, transforms, models
+from data import get_dataloaders
+from model import get_model
+from engine import train_one_epoch, validate
+from utils import save_model, get_device, get_model_path
 from torch import nn, optim
-from torch.utils.data import DataLoader
 import os
-
-
-# Transforms
-train_transform = transforms.Compose(
-    [
-        # transforms.Resize((224, 224)), # not in exp2, exp4
-        transforms.RandomResizedCrop(224, scale=(0.8, 1.0)), # in exp2, exp4
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(20), # 10 -> 20 (exp2, exp4) -> 10
-        transforms.ColorJitter(
-            brightness=0.3,
-            contrast=0.3,
-            saturation=0.3
-        ),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
-        )
-    ]
-)
-
-val_transform = transforms.Compose(
-    [
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
-        )
-    ]
-)
 
 # Data directory
 DATA_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/data"
 
-# Dataset
-train_data = datasets.ImageFolder(os.path.join(DATA_DIR,"train"), transform=train_transform)
-val_data = datasets.ImageFolder(os.path.join(DATA_DIR,"val"), transform=val_transform)
-
 # Config
 BATCH_SIZE = 32
 EPOCHS = 10 # 5 -> 10 
-NUM_CLASSES = len(train_data.classes)
-
-# DataLoader
-train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
-val_loader = DataLoader(val_data, batch_size=BATCH_SIZE, shuffle=False)
-
-# Model 
-model = models.resnet34(weights="IMAGENET1K_V1") # resnet18 -> resnet34
-
-# Freeze layers
-for param in model.parameters():
-    param.requires_grad = False
-
-# fine-tuning -> modified layer 4 
-for param in model.layer4.parameters():  # in exp2, exp4
-    param.requires_grad = True
-
-# Replace the final layer
-model.fc = nn.Linear(model.fc.in_features, NUM_CLASSES)
-
-#  train FC layer
-for param in model.fc.parameters():
-    param.requires_grad = True
+EXP_NAME = "exp4_resnet18_balanced_finetune_differential_lrs_weight_decay" # change for each experiment
+MODEL_NAME = "resnet18" # resnet18 -> resnet34
 
 
-# check if GPU is available
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
+# get device
+device = get_device()
+
+# get loaders and number of classes
+train_loader, val_loader, NUM_CLASSES, CLASS_NAMES = get_dataloaders(DATA_DIR, BATCH_SIZE)
+
+print(f"Classes: {CLASS_NAMES}")
+print(f"Epochs: {EPOCHS}, Batch Size: {BATCH_SIZE}")
+
+# get model
+model = get_model(MODEL_NAME, NUM_CLASSES)
+
+# send model to device
 model.to(device)
 
 # Loss 
@@ -96,78 +50,28 @@ optimizer = optim.Adam(
 # initialize best accuracy
 best_acc = 0.0
 
-# Directory to save the best model
-MODEL_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/models"
+# Path to save the best model
+model_path = get_model_path(EXP_NAME)
 
-# Create the directory if it doesn't exist
-os.makedirs(MODEL_DIR, exist_ok=True)
-
-EXP_NAME = "exp5_resnet34_finetune_differential_lrs_weight_decay" # change for each experiment
-
-model_path = os.path.join(MODEL_DIR, f"{EXP_NAME}.pth")
-
-print(f"Training ResNet34 for experiment {EXP_NAME}...") # resnet18 -> resnet34
+print(f"Training {MODEL_NAME} for experiment {EXP_NAME}...") # resnet18 -> resnet34
 
 # Training Loop
 for epoch in range(EPOCHS):
     # Training phase
-    model.train()
-    train_loss = 0
-    correct = 0
-    total = 0
-
-    for images, labels in train_loader:
-        images, labels = images.to(device), labels.to(device)
-
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        train_loss += loss.item()
-
-        _, predicted = torch.max(outputs, 1)
-        correct += (predicted == labels).sum().item()
-        total += labels.size(0)
-
-    train_acc = 100 * correct / total 
-
+    train_avg_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion, device)
 
     # Validation phase
-    model.eval()
-    val_loss = 0
-    val_correct = 0
-    val_total = 0
-
-    with torch.no_grad():
-        for images, labels in val_loader:
-            images, labels = images.to(device), labels.to(device)
-
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-
-            val_loss += loss.item()
-
-            _, predicted = torch.max(outputs, 1)
-            val_correct += (predicted == labels).sum().item()
-            val_total += labels.size(0)
-
-    val_acc = 100 * val_correct / val_total
+    val_avg_loss, val_acc = validate(model, val_loader, criterion, device)
 
     # Save the best model
     if val_acc > best_acc:
         best_acc = val_acc
-        torch.save({
-            "model_state_dict": model.state_dict(),
-            "num_classes": NUM_CLASSES,
-        }, model_path)
+        save_model(model, NUM_CLASSES, model_path)
         print(f"Best model saved with accuracy: {best_acc:.2f}%")
 
     print(f"Epoch {epoch+1}")
-    print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.2f}%")
-    print(f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.2f}%")
+    print(f"Train Loss: {train_avg_loss:.4f}, Train Accuracy: {train_acc:.2f}%")
+    print(f"Val Loss: {val_avg_loss:.4f}, Val Accuracy: {val_acc:.2f}%")
     print("-" * 30)
 
 print("Training completed successfully!")

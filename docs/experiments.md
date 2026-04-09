@@ -514,3 +514,111 @@ weighted avg       0.90      0.90      0.90       301
 - Data augmentation significantly improves generalization
 - Differential learning rates stabilize training
 - Bigger models are not always better
+
+## Training Pipeline & Reproducibility
+
+### Task 1: Refactoring into Modules
+
+#### Objective
+Refactor the project into modular components to improve readability, reusability, and maintainability.
+
+---
+
+### Refactored Project Structure
+```
+src/
+│
+├── data.py # Data loading and transforms
+├── model.py # Model architecture (ResNet18/34)
+├── engine.py # Training and validation loops
+├── utils.py # Helper functions (save/load/device/visualization)
+├── train.py # Training entry point
+├── evaluate.py # Evaluation + error analysis
+├── predict.py # (planned) inference script
+├── gradcam.py # (planned) interpretability
+```
+
+---
+
+### Key Changes
+
+#### 1. Data Module (`data.py`)
+- Centralized all transforms
+- Created reusable functions:
+  - `get_dataloaders()`
+  - `get_test_loader()`
+- Returns:
+  - DataLoaders
+  - Number of classes
+  - Class names
+
+---
+
+#### 2. Model Module (`model.py`)
+- Unified model creation using `get_model()`
+- Supports:
+  - ResNet18
+  - ResNet34
+- Added `freeze_backbone` flag:
+  - `True` → training (fine-tuning)
+  - `False` → evaluation/inference
+
+---
+
+#### 3. Engine Module (`engine.py`)
+- Separated training logic:
+  - `train_one_epoch()`
+  - `validate()`
+- Returns:
+  - Average loss
+  - Accuracy
+
+---
+
+#### 4. Utils Module (`utils.py`)
+- Centralized reusable utilities:
+  - `save_model()`
+  - `load_model()`
+  - `get_device()`
+  - `get_model_path()`
+  - `show_misclassified()`
+
+---
+
+#### 5. Training Script (`train.py`)
+- Now acts as a clean entry point
+- Uses modular components
+- Handles:
+  - Data loading
+  - Model creation
+  - Training loop
+  - Saving best model
+
+---
+
+#### 6. Evaluation Script (`evaluate.py`)
+- Uses modular pipeline
+- Performs:
+  - Test evaluation
+  - Confusion matrix
+  - Classification report
+  - Error grouping
+  - Misclassified visualization
+
+---
+
+### Benefits of Refactoring
+
+- Cleaner and maintainable codebase
+- Easier debugging and experimentation
+- Reusable components across experiments
+- Ready for:
+  - CLI/config-based training
+  - Deployment (Streamlit app)
+  - Interpretability (Grad-CAM)
+
+---
+
+### Conclusion
+
+Successfully transformed the project into a modular deep learning pipeline, aligning with industry practices and enabling scalable experimentation.
