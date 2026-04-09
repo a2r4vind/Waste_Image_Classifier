@@ -20,3 +20,13 @@ weighted avg       0.91      0.90      0.90       301
 
 
 Test Accuracy: 90.37%
+
+Error Analysis (True -> Predicted : Sample Count):
+metal -> glass: 6 samples
+plastic -> glass: 6 samples
+glass -> metal: 5 samples
+plastic -> metal: 5 samples
+plastic -> paper: 3 samples
+paper -> glass: 2 samples
+glass -> plastic: 1 samples
+paper -> metal: 1 samples

@@ -310,6 +310,57 @@ weighted avg       0.91      0.90      0.90       301
 ```
 
 ---
+## Error Analysis 
+
+### Total Misclassified Samples
+- **29 / 301**
+
+### Error Distribution (True → Predicted : Sample Count)
+- metal   → glass   : 6
+- plastic → glass   : 6
+- glass   → metal   : 5
+- plastic → metal   : 5
+- plastic → paper   : 3
+- paper   → glass   : 2
+- glass   → plastic : 1
+- paper   → metal   : 1
+
+---
+
+### Observations in error analysis
+
+1. **Glass vs Metal Confusion**
+   - Frequent bidirectional errors (glass ↔ metal)
+   - Likely due to:
+     - Reflective surfaces
+     - Similar textures (shiny/transparent materials)
+
+2. **Plastic misclassified as Glass/Metal**
+   - Plastic bottles with transparency resemble glass
+   - Rigid plastic objects resemble metal containers
+
+3. **Paper performs best**
+   - Highest precision and recall (0.97)
+   - Likely due to distinct texture and appearance
+
+4. **Plastic Recall is lower (0.81)**
+   - Indicates model struggles to consistently identify plastic
+
+---
+
+### Visual Error Inspection
+
+- Misclassified samples saved at:
+
+results/exp4_resnet18_balanced_finetune_differential_lrs_weight_decay_misclassified.png
+
+
+- Key patterns observed:
+  - Transparent objects → confusion (glass vs plastic)
+  - Shiny/reflective surfaces → confusion (glass vs metal)
+  - Background clutter impacts classification
+
+---
 
 ### Key Observations
 - Differential learning rates improved stability of fine-tuning
