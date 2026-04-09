@@ -280,12 +280,6 @@ Improve model generalization and stability by:
 ### Test Results
 - Test Accuracy: 90.37%
 
-#### Classification Report
-- Glass → Precision: 0.83 | Recall: 0.92 | F1-score: 0.88
-- Metal → Precision: 0.84 | Recall: 0.90 | F1-score: 0.87
-- Paper → Precision: 0.97 | Recall: 0.97 | F1-score: 0.97
-- Plastic → Precision: 0.98 | Recall: 0.81 | F1-score: 0.89
-
 ---
 
 #### Confusion Matrix
@@ -351,3 +345,121 @@ This model provides the best balance between performance and generalization.
 ### Next Steps
 
 - Explore deeper architectures (ResNet34 / EfficientNet)
+
+## Experiment 5: ResNet34 + Fine-Tuning + Differential Learning Rates + Weight Decay
+
+### Objective
+To evaluate whether a deeper architecture (ResNet34) improves performance compared to ResNet18, while using:
+- Data augmentation
+- Fine-tuning (Layer4 + FC)
+- Differential learning rates
+- Weight decay for regularization
+
+---
+
+### Model Configuration
+- Model: ResNet34 (pretrained on ImageNet)
+- Trainable Layers:
+  - Fully Connected (FC)
+  - Layer4 (fine-tuning)
+- Optimizer: Adam
+  - FC layer → LR = 0.0005
+  - Layer4 → LR = 0.0001
+  - Weight Decay = 1e-4
+- Loss Function: CrossEntropyLoss
+- Batch Size: 32
+- Epochs: 10
+
+---
+
+### Data Augmentation
+- RandomResizedCrop (224)
+- Horizontal Flip (p=0.5)
+- Rotation (20°)
+- ColorJitter (brightness, contrast, saturation = 0.3)
+- Normalization (ImageNet stats)
+
+---
+
+### Training Results
+- Best Validation Accuracy: 91.25% (Epoch 4)
+- Training Accuracy reached ~98% → slight overfitting observed after epoch 4
+
+---
+
+### Test Results
+- Test Accuracy: 90.03%
+
+#### Confusion Matrix
+```
+| Actual \ Predicted | glass | metal | paper | plastic |
+|--------------------|-------|-------|-------|---------|
+| metal              | 71    | 4     | 0     | 1       |
+| glass              | 6     | 54    | 1     | 1       |
+| paper              | 2     | 0     | 86    | 2       |
+| plastic            | 8     | 2     | 3     | 60      |
+```
+
+---
+
+#### Classification Report
+```
+Classification Report:
+              precision    recall  f1-score   support
+
+       glass       0.82      0.93      0.87        76
+       metal       0.90      0.87      0.89        62
+       paper       0.96      0.96      0.96        90
+     plastic       0.94      0.82      0.88        73
+
+    accuracy                           0.90       301
+   macro avg       0.90      0.90      0.90       301
+weighted avg       0.90      0.90      0.90       301
+```
+
+---
+### Observations
+- Significant improvement over baseline (EXP1 ~79% → EXP5 ~90%)
+- Performance comparable to EXP4 (ResNet18 tuned model)
+- Paper class remains easiest (highest precision & recall)
+- Plastic recall improved slightly, but still lower than other classes
+- Model shows mild overfitting after epoch 4
+
+---
+
+### Comparison with Previous Experiments
+```
+| Experiment |   Model  |           Strategy                   | Test Accuracy |
+|------------|----------|--------------------------------------|---------------|
+| Exp1       | ResNet18 |Baseline (FC only)                    | 79.07%        |
+| Exp2       | ResNet18 |Augmentation + Layer4 fine-tune       | 90.03%        |
+| Exp3       | ResNet18 |Reduced LR (FC only)                  | 75.75%        |
+| Exp4       | ResNet18 |Differential LR + Weight Decay        | **90.37%**    |
+| Exp5       | ResNet34 |Deeper model + same strategy as EXP4  | 90.03%        |
+```
+
+---
+
+### Classification Insights
+- Increasing model depth (ResNet34) did NOT significantly outperform ResNet18
+- Proper fine-tuning + optimization strategy matters more than model size
+- EXP4 remains the best-performing experiment
+
+---
+
+## Final Conclusion
+
+- Baseline model (EXP1) provided a strong starting point (~79%)
+- Data augmentation + fine-tuning (EXP2) gave the biggest performance boost
+- Reducing learning rate without fine-tuning (EXP3) hurt performance
+- Differential learning rates + weight decay (EXP4) achieved the best results (~90.37%)
+- Increasing model depth (EXP5) did not significantly improve performance
+
+### Best Model:
+**EXP4 - ResNet18 with differential learning rates and weight decay**
+
+### Key Takeaways:
+- Fine-tuning deeper layers is critical for performance
+- Data augmentation significantly improves generalization
+- Differential learning rates stabilize training
+- Bigger models are not always better

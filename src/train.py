@@ -53,7 +53,7 @@ train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
 val_loader = DataLoader(val_data, batch_size=BATCH_SIZE, shuffle=False)
 
 # Model 
-model = models.resnet18(weights="IMAGENET1K_V1") # resnet18 -> resnet34
+model = models.resnet34(weights="IMAGENET1K_V1") # resnet18 -> resnet34
 
 # Freeze layers
 for param in model.parameters():
@@ -80,18 +80,17 @@ model.to(device)
 criterion = nn.CrossEntropyLoss()
 
 # Optimizer
-# optimizer = optim.Adam(model.fc.parameters(), lr=0.001) # 0.001 => Higher LR helps faster convergence
 # optimizer = optim.Adam(
 #     list(model.fc.parameters()) + list(model.layer4.parameters()), # in exp2
 #     lr=0.001
 # )
-# optimizer = optim.Adam(model.fc.parameters(), lr=0.0003) # lr = 0.001 -> 0.0003 (exp3)
+# optimizer = optim.Adam(model.fc.parameters(), lr=0.0003) # lr = 0.001 (exp1) -> 0.0003 (exp3)
 optimizer = optim.Adam(
     [
-        {"params": model.fc.parameters(), "lr": 0.0005}, # faster learning 
-        {"params": model.layer4.parameters(), "lr": 0.0001} # slower learning
+        {"params": model.fc.parameters(), "lr": 0.0005}, # faster learning in exp4, exp5
+        {"params": model.layer4.parameters(), "lr": 0.0001} # slower learning in exp4, exp5
     ],
-    weight_decay=1e-4 # help reduce overfitting in exp4
+    weight_decay=1e-4 # help reduce overfitting in exp4, exp5
 )
 
 # initialize best accuracy
@@ -103,11 +102,11 @@ MODEL_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/models"
 # Create the directory if it doesn't exist
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-EXP_NAME = "exp4_resnet18_balanced_finetune_differential_lrs_weight_decay" # change for each experiment
+EXP_NAME = "exp5_resnet34_finetune_differential_lrs_weight_decay" # change for each experiment
 
 model_path = os.path.join(MODEL_DIR, f"{EXP_NAME}.pth")
 
-print(f"Training ResNet18 for experiment {EXP_NAME}...")
+print(f"Training ResNet34 for experiment {EXP_NAME}...") # resnet18 -> resnet34
 
 # Training Loop
 for epoch in range(EPOCHS):
@@ -160,7 +159,10 @@ for epoch in range(EPOCHS):
     # Save the best model
     if val_acc > best_acc:
         best_acc = val_acc
-        torch.save(model.state_dict(), model_path)
+        torch.save({
+            "model_state_dict": model.state_dict(),
+            "num_classes": NUM_CLASSES,
+        }, model_path)
         print(f"Best model saved with accuracy: {best_acc:.2f}%")
 
     print(f"Epoch {epoch+1}")

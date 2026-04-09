@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 # experiment name
-EXP_NAME = "exp4_resnet18_balanced_finetune_differential_lrs_weight_decay" # change for each experiment
+EXP_NAME = "exp5_resnet34_finetune_differential_lrs_weight_decay" # change for each experiment
 print(f"Evaluating model for experiment {EXP_NAME}...")
 print("=== Evaluation Started ===")
 
@@ -30,6 +30,13 @@ transform = transforms.Compose(
     ]
 )
 
+# directory for models 
+MODEL_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/models"
+# Create the directory if it doesn't exist
+os.makedirs(MODEL_DIR, exist_ok=True)
+# path to saved model
+model_path = os.path.join(MODEL_DIR, f"{EXP_NAME}.pth")
+
 # Load the test data
 test_data = datasets.ImageFolder("/home/akki2404/CV_Project/Waste_Image_Classifier/data/test", transform=transform)
 
@@ -37,9 +44,13 @@ test_data = datasets.ImageFolder("/home/akki2404/CV_Project/Waste_Image_Classifi
 test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=False)
 
 # Load the model
-model = models.resnet18(weights="IMAGENET1K_V1")
+model = models.resnet34(weights="IMAGENET1K_V1")
 model.fc = torch.nn.Linear(model.fc.in_features, NUM_CLASSES)
-model.load_state_dict(torch.load(f"/home/akki2404/CV_Project/Waste_Image_Classifier/models/{EXP_NAME}.pth", map_location=device))
+
+checkpoint = torch.load(model_path, map_location=device)
+model.load_state_dict(checkpoint["model_state_dict"])
+# Earlier way of loading model without checkpoint dict
+# model.load_state_dict(torch.load(f"/home/akki2404/CV_Project/Waste_Image_Classifier/models/{EXP_NAME}.pth", map_location=device))
 model.to(device)
 
 # Evaluation
