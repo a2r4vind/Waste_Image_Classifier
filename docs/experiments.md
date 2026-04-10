@@ -517,7 +517,7 @@ weighted avg       0.90      0.90      0.90       301
 
 ## Training Pipeline & Reproducibility
 
-## Task 1: Refactoring into Modules
+## Task: Refactoring into Modules
 
 ### Objective
 Refactor the project into modular components to improve readability, reusability, and maintainability.
@@ -623,7 +623,7 @@ src/
 
 Successfully transformed the project into a modular deep learning pipeline, aligning with industry practices and enabling scalable experimentation.
 
-## Task 2: Config-Driven Training & Evaluation
+## Task: Config-Driven Training & Evaluation
 
 ### Objective
 
@@ -792,7 +792,7 @@ Total misclassified samples: **27 / 301**
 
 Successfully transitioned from script-based experimentation to a config-driven ML pipeline. This significantly improves reproducibility, scalability, and aligns with industry best practices.
 
-## Task3: Inference Pipeline & Real Image Testing
+## Task: Inference Pipeline & Real Image Testing
 
 ### Objective
 
@@ -900,4 +900,38 @@ Test Image: `test_sample.jpg`
 * Build Streamlit app for user interaction
 * Add Grad-CAM for model explainability
 * Explore multi-label classification approach
+
+## Task: Streamlit Frontend & Deployment Preparation
+
+### Streamlit App (app.py)
+Built interactive UI for waste classification.
+- Users can:
+  - Upload an image
+  - Select model (ResNet18 or ResNet34)
+  - View predictions instantly
+
+### Features
+
+- Model selection:
+  - ResNet18 (exp4)
+  - ResNet34 (exp6)
+
+- Displays:
+  - Top predicted class
+  - Confidence score
+  - Top-3 predictions with probability bars
+
+- Image preview before prediction
+
+### Optimization
+
+- Implemented model caching using **@st.cache_resource**
+- Efficient model switching using session state
+
+### Integration
+
+Connected frontend with inference pipeline (predict.py)
+
+- Ensured seamless end-to-end flow:
+  Upload → Preprocess → Predict → Display
 
