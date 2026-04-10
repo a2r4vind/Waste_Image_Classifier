@@ -21,6 +21,7 @@ fonttools==4.62.1
 fsspec==2026.2.0
 gitdb==4.0.12
 GitPython==3.1.46
+grad-cam==1.5.5
 idna==3.11
 ipykernel==7.2.0
 ipython==8.39.0
@@ -88,6 +89,7 @@ Pygments==2.20.0
 pyparsing==3.3.2
 python-dateutil==2.9.0.post0
 pytz==2026.1.post1
+PyYAML==6.0.3
 pyzmq==27.1.0
 referencing==0.37.0
 requests==2.33.1
@@ -106,8 +108,10 @@ torch==2.11.0+cu130
 torchaudio==2.11.0+cu130
 torchvision==0.26.0+cu130
 tornado==6.5.5
+tqdm==4.67.3
 traitlets==5.14.3
 triton==3.6.0
+ttach==0.0.3
 typing_extensions==4.15.0
 tzdata==2026.1
 urllib3==2.6.3

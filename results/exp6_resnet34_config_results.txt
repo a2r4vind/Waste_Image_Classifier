@@ -1,0 +1,32 @@
+Experiment: exp6_resnet34_config
+
+Confusion Matrix:
+[[65  7  0  4]
+ [ 0 59  0  3]
+ [ 0  1 86  3]
+ [ 3  3  3 64]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+       glass       0.96      0.86      0.90        76
+       metal       0.84      0.95      0.89        62
+       paper       0.97      0.96      0.96        90
+     plastic       0.86      0.88      0.87        73
+
+    accuracy                           0.91       301
+   macro avg       0.91      0.91      0.91       301
+weighted avg       0.91      0.91      0.91       301
+
+
+Test Accuracy: 91.03%
+
+Error Analysis (True -> Predicted : Sample Count):
+glass -> metal: 7 samples
+glass -> plastic: 4 samples
+metal -> plastic: 3 samples
+paper -> plastic: 3 samples
+plastic -> metal: 3 samples
+plastic -> paper: 3 samples
+plastic -> glass: 3 samples
+paper -> metal: 1 samples

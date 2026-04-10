@@ -517,9 +517,9 @@ weighted avg       0.90      0.90      0.90       301
 
 ## Training Pipeline & Reproducibility
 
-### Task 1: Refactoring into Modules
+## Task 1: Refactoring into Modules
 
-#### Objective
+### Objective
 Refactor the project into modular components to improve readability, reusability, and maintainability.
 
 ---
@@ -622,3 +622,172 @@ src/
 ### Conclusion
 
 Successfully transformed the project into a modular deep learning pipeline, aligning with industry practices and enabling scalable experimentation.
+
+## Task 2: Config-Driven Training & Evaluation
+
+### Objective
+
+Eliminate hardcoded experiment settings and introduce a configuration-based system to improve reproducibility, scalability, and experimentation efficiency.
+
+---
+
+### Implementation
+
+#### 1. YAML-based Configuration
+
+Created a dedicated `configs/` directory with experiment-specific YAML files.
+
+Example (`exp6.yaml`):
+
+```yaml
+experiment:
+  name: exp6_resnet34_config
+
+data:
+  data_dir: /home/akki2404/CV_Project/Waste_Image_Classifier/data
+  batch_size: 32
+
+model:
+  name: resnet34
+
+training:
+  epochs: 10
+
+evaluation:
+  results_dir: /home/akki2404/CV_Project/Waste_Image_Classifier/results
+
+optimizer:
+  fc_lr: 0.0005
+  backbone_lr: 0.0001
+  weight_decay: 1e-4
+```
+
+---
+
+#### 2. Config Integration
+
+Updated:
+
+* `train.py`
+* `evaluate.py`
+
+to dynamically load parameters using:
+
+```python
+import yaml
+import argparse
+```
+
+Execution now done via:
+
+```bash
+python src/train.py --config configs/exp6.yaml
+python src/evaluate.py --config configs/exp6.yaml
+```
+
+---
+
+### Experiment: exp6_resnet34_config
+
+#### Configuration
+
+* Model: ResNet34
+* Batch Size: 32
+* Epochs: 10
+* Optimizer: Adam
+* Differential Learning Rates:
+
+  * FC Layer: 0.0005
+  * Backbone (layer4): 0.0001
+* Weight Decay: 1e-4
+
+---
+
+### Training Performance
+```
+| Metric                    | Value                |
+| ------------------------- | ---------------------|
+| Best Validation Accuracy  | **91.92% (Epoch 4)** |
+```
+- Training Accuracy reached ~98%
+
+---
+
+### Test Performance
+```
+| Metric            | Value      |
+| ----------------- | ---------- |
+| Test Accuracy     | **91.03%** |
+| Macro F1 Score    | 0.91       |
+| Weighted F1 Score | 0.91       |
+```
+---
+
+#### Confusion Matrix
+```
+| Actual \ Predicted | glass | metal | paper | plastic |
+|--------------------|-------|-------|-------|---------|
+| metal              |  65   | 7     | 0     | 4       |
+| glass              | 0     | 59    | 0     | 3       |
+| paper              | 0     | 1     | 86    | 3       |
+| plastic            | 3     | 3     | 3     | 64      |
+```
+---
+
+#### Classification Report
+```
+Classification Report:
+              precision    recall  f1-score   support
+
+       glass       0.96      0.86      0.90        76
+       metal       0.84      0.95      0.89        62
+       paper       0.97      0.96      0.96        90
+     plastic       0.86      0.88      0.87        73
+
+    accuracy                           0.91       301
+   macro avg       0.91      0.91      0.91       301
+weighted avg       0.91      0.91      0.91       301
+```
+
+---
+
+### Error Analysis
+
+Top misclassification patterns:
+
+* Glass → Metal (7 samples)
+* Glass → Plastic (4 samples)
+* Metal → Plastic (3 samples)
+* Paper → Plastic (3 samples)
+
+Total misclassified samples: **27 / 301**
+
+---
+
+### Observations
+
+* ResNet34 significantly improved performance over previous experiments.
+* Paper class achieved the highest performance (F1 = 0.96).
+* Confusion observed between:
+
+  * Glass ↔ Metal
+  * Plastic ↔ Multiple classes
+* Likely due to:
+
+  * Visual similarity
+  * Lighting/reflection conditions in images
+
+---
+
+### Improvements Achieved
+
+* Introduced reproducible experiment pipeline
+* Eliminated hardcoded hyperparameters
+* Enabled quick experiment switching via config files
+* Improved model performance to **91%+ accuracy**
+
+---
+
+### Conclusion
+
+Successfully transitioned from script-based experimentation to a config-driven ML pipeline. This significantly improves reproducibility, scalability, and aligns with industry best practices.

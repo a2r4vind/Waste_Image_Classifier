@@ -3,16 +3,24 @@ from model import get_model
 from engine import train_one_epoch, validate
 from utils import save_model, get_device, get_model_path
 from torch import nn, optim
-import os
+import yaml
+import argparse
 
-# Data directory
-DATA_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/data"
+# Load config
+parser = argparse.ArgumentParser()
+parser.add_argument("--config", type=str, required=True, help="Path to the config file")
+args = parser.parse_args()
 
-# Config
-BATCH_SIZE = 32
-EPOCHS = 10 # 5 -> 10 
-EXP_NAME = "exp4_resnet18_balanced_finetune_differential_lrs_weight_decay" # change for each experiment
-MODEL_NAME = "resnet18" # resnet18 -> resnet34
+with open(args.config, "r") as f:
+    config = yaml.safe_load(f)
+
+# Configs
+DATA_DIR = config["data"]["data_dir"] #  Data directory
+BATCH_SIZE = int(config["data"]["batch_size"])
+EPOCHS = int(config["training"]["epochs"]) # 5 (baseline model) -> 10 
+MODEL_NAME = config["model"]["name"] # resnet18 -> resnet34
+EXP_NAME = config["experiment"]["name"] # change for each experiment
+
 
 
 # get device
@@ -21,7 +29,7 @@ device = get_device()
 # get loaders and number of classes
 train_loader, val_loader, NUM_CLASSES, CLASS_NAMES = get_dataloaders(DATA_DIR, BATCH_SIZE)
 
-print(f"Classes: {CLASS_NAMES}")
+print(f"\nClasses: {CLASS_NAMES}")
 print(f"Epochs: {EPOCHS}, Batch Size: {BATCH_SIZE}")
 
 # get model
@@ -41,10 +49,10 @@ criterion = nn.CrossEntropyLoss()
 # optimizer = optim.Adam(model.fc.parameters(), lr=0.0003) # lr = 0.001 (exp1) -> 0.0003 (exp3)
 optimizer = optim.Adam(
     [
-        {"params": model.fc.parameters(), "lr": 0.0005}, # faster learning in exp4, exp5
-        {"params": model.layer4.parameters(), "lr": 0.0001} # slower learning in exp4, exp5
+        {"params": model.fc.parameters(), "lr": float(config["optimizer"]["fc_lr"])}, # faster learning in exp4, exp5
+        {"params": model.layer4.parameters(), "lr": float(config["optimizer"]["backbone_lr"])} # slower learning in exp4, exp5
     ],
-    weight_decay=1e-4 # help reduce overfitting in exp4, exp5
+    weight_decay=float(config["optimizer"]["weight_decay"]) # help reduce overfitting in exp4, exp5
 )
 
 # initialize best accuracy
@@ -53,7 +61,8 @@ best_acc = 0.0
 # Path to save the best model
 model_path = get_model_path(EXP_NAME)
 
-print(f"Training {MODEL_NAME} for experiment {EXP_NAME}...") # resnet18 -> resnet34
+print(f"\nTraining {MODEL_NAME} for experiment {EXP_NAME}...") # resnet18 -> resnet34
+print("=== Training Started ===\n")
 
 # Training Loop
 for epoch in range(EPOCHS):

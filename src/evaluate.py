@@ -6,31 +6,33 @@ from collections import defaultdict
 from data import get_test_loader
 from utils import get_device, load_model, get_model_path, show_misclassified
 from model import get_model
+import yaml
+import argparse
 
-# Data directory
-DATA_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/data"
+# load config
+parser = argparse.ArgumentParser()
+parser.add_argument("--config", type=str, required=True, help="path to the config file")
+args = parser.parse_args()
 
-# results directory
-RESULTS_DIR = "/home/akki2404/CV_Project/Waste_Image_Classifier/results"
-os.makedirs(RESULTS_DIR, exist_ok=True)
+with open(args.config, "r") as f:
+    config = yaml.safe_load(f)
 
-# experiment name
-EXP_NAME = "exp4_resnet18_balanced_finetune_differential_lrs_weight_decay" # change for each experiment
-
+# Configs
+DATA_DIR = config["data"]["data_dir"] # Data directory
+EXP_NAME = config["experiment"]["name"] # experiment name change for each experiment
+BATCH_SIZE = int(config["data"]["batch_size"])
+MODEL_NAME = config["model"]["name"]
+RESULTS_DIR = config["evaluation"]["results_dir"] # results directory
+os.makedirs(RESULTS_DIR, exist_ok=True) # create results directory if it doesn't exist
 
 print(f"Evaluating model for experiment {EXP_NAME}...")
 print("=== Evaluation Started ===")
-
-# Config
-BATCH_SIZE = 32
-MODEL_NAME = "resnet18"
 
 # Device
 device = get_device()
 
 # path to saved model
 model_path = get_model_path(EXP_NAME)
-
 
 # test DataLoader, NUM_CLASSES and CLASS_NAMES
 test_loader, NUM_CLASSES, CLASS_NAMES = get_test_loader(DATA_DIR, BATCH_SIZE)

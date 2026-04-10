@@ -1,0 +1,20 @@
+experiment:
+  name: exp6_resnet34_config
+
+data:
+  data_dir: /home/akki2404/CV_Project/Waste_Image_Classifier/data
+  batch_size: 32
+
+model:
+  name: resnet34
+
+training:
+  epochs: 10
+
+evaluation:
+  results_dir: /home/akki2404/CV_Project/Waste_Image_Classifier/results
+
+optimizer:
+  fc_lr: 0.0005
+  backbone_lr: 0.0001
+  weight_decay: 1e-4
