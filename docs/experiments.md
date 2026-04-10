@@ -791,3 +791,113 @@ Total misclassified samples: **27 / 301**
 ### Conclusion
 
 Successfully transitioned from script-based experimentation to a config-driven ML pipeline. This significantly improves reproducibility, scalability, and aligns with industry best practices.
+
+## Task3: Inference Pipeline & Real Image Testing
+
+### Objective
+
+Build an inference pipeline to enable real-world usage of the trained model and validate predictions on unseen images.
+
+---
+
+### Implementation
+
+#### 1. Prediction Module (`predict.py`)
+
+* Created a reusable inference script
+* Supports both:
+
+  * Image path input
+  * PIL image input (for future Streamlit integration)
+
+Key features:
+
+* Image preprocessing aligned with training (ImageNet normalization)
+* Top-K predictions (Top-3)
+* Returns:
+
+  * Top predicted class
+  * Confidence score
+  * Full ranked predictions
+
+---
+
+#### 2. Model Loading for Inference
+
+* Implemented `load_model_for_inference()`
+* Ensures:
+
+  * Correct architecture loading
+  * Weights restoration
+  * Model set to evaluation mode
+
+---
+
+#### 3. Testing Script (`test.py`)
+
+* Built a standalone script to validate inference pipeline
+* Added:
+
+  * Clean formatted output
+  * Error handling (try-except)
+
+---
+
+### Real Image Testing
+
+Test Image: `test_sample.jpg`
+
+#### Output:
+
+* Top Prediction: **paper (99.97%)**
+* Top Predictions:
+
+  * paper: 99.97%
+  * plastic: 0.03%
+  * glass: 0.00%
+
+---
+
+### Observations
+
+* Model correctly identified **paper as dominant material**
+* High confidence due to:
+
+  * Strong presence of paper textures
+  * Model bias toward dominant visual features
+* Image contained mixed materials, but model predicted a **single class**
+
+---
+
+### Key Insight
+
+* Current model is a **single-label classifier**
+* In real-world waste scenarios:
+
+  * Images may contain multiple materials
+  * Model predicts only the dominant class
+
+---
+
+### Limitations Identified
+
+* Cannot handle multi-material classification
+* Overconfident predictions in mixed-class scenarios
+* No uncertainty estimation
+
+---
+
+### Learnings
+
+* Successfully built end-to-end inference pipeline
+* Validated model behavior on real-world data
+* Understood limitations of single-label classification
+
+---
+
+### Next Steps
+
+* Build Streamlit app for user interaction
+* Add Grad-CAM for model explainability
+* Explore multi-label classification approach
+
